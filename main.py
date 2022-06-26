@@ -203,7 +203,7 @@ def starting():
                 return 0
             if event.type == pg.MOUSEBUTTONDOWN and cancb:
                 return 0
-            if event.type == pg.MOUSEBUTTONDOWN and loadb and pu != __file__:
+            if event.type == pg.MOUSEBUTTONDOWN and loadb and pu != __name__:
                 os.remove(pu)
                 os.remove('deliteversion.txt')
                 return starting_load()
@@ -692,7 +692,7 @@ if game_loop:
                     SERVER.download('/app1/' + down, down)
                     with open('deliteversion.txt', mode='a+', encoding=VERSION_DATA['enc']) as file:
                         file.writelines(VERSION_DATA['version'] + '\n')
-                        file.writelines(__file__ + '\n')
+                        file.writelines(__name__ + '\n')
                     game_loop = False
                 if left_panel_1.mode and True in buttons[:5] and not game and flag:
                     lkf = buttons.index(True)
