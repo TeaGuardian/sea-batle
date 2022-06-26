@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 pg.init()
 SERVER = yadisk.YaDisk(token='ВАШ_ТОКЕН')
 clock = pg.time.Clock()
-VERSION_DATA = {'version': '0.0.0',
+VERSION_DATA = {'version': '0.0.1',
                 'files': ['0F.png', '0T.png', '1F.png', '1T.png', '5T.png',
                           '2F.png', '2T.png', '3F.png', '3T.png', '5F.png',
                           '4F.png', '4T.png', 'info.png', 'go.png', '5M.png',
@@ -450,10 +450,19 @@ class Field:
                 for i in self.ships[ship]:
                     self.my_field[i[0]][i[1]].rename(self.files[self.points[(i[0], i[1])][1]], COLORS['red'],
                                                      self.points[(i[0], i[1])][2])
+                var = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [0, 1], [1, -1], [1, 0], [1, 1]]
+                for b in self.ships[ship]:
+                    for c in var:
+                        pl = [b[0] + c[0], b[1] + c[1]]
+                        if pl[0] in range(self.D) and pl[1] in range(self.D) and pl not in self.ships[ship]:
+                            self.my_field[pl[0]][pl[1]].rename(self.files['5F'], COLORS['dark_blue'])
+                self.task(COLORS['red'], x, y)
                 return 3, self.ships[ship]
+            self.task(COLORS['yellow'], x, y)
             return 2, [[x, y]]
         else:
             self.my_field[x][y].rename(self.files['5F'], COLORS['dark_blue'])
+        self.task(COLORS['dark_blue'], x, y)
         return 0, [[x, y]]
 
     def resp(self):
@@ -596,7 +605,7 @@ if game_loop:
     left_panel_2 = LeftSetupPanel(screen, [but, text1])
     top_panel = TopSetupPanel(screen)
     left_panel_1.hide(True)
-    timer1, timer2, timer_e, timer3 = Timer(5), Timer(20), Timer(1), Timer(5)
+    timer1, timer2, timer_e, timer3 = Timer(5), Timer(20), Timer(2), Timer(1)
     version_update, ship_in_hands = [], [None, 0]
     enemy_po = [randint(1, 18), randint(1, 18)]
     enemy_var, enemy_task = [[-1, 0], [0, -1], [0, 0], [0, 1], [1, 0]], []
@@ -678,7 +687,14 @@ if game_loop:
                         now.hide(False)
                     else:
                         now.hide(True)
-                if left_panel_1.mode and True in buttons[:5] and not game:
+                if left_panel_2.mode and buttons[0] and len(version_update) and False not in enternet():
+                    down = max(version_update)
+                    SERVER.download('/app1/' + down, down)
+                    with open('deliteversion.txt', mode='a+', encoding=VERSION_DATA['enc']) as file:
+                        file.writelines(VERSION_DATA['version'] + '\n')
+                        file.writelines(__file__ + '\n')
+                    game_loop = False
+                if left_panel_1.mode and True in buttons[:5] and not game and flag:
                     lkf = buttons.index(True)
                     ship_in_hands[0] = 5 - lkf
                     now.hide(False)
@@ -695,13 +711,6 @@ if game_loop:
                     elif buttons[6]:
                         player.autopos()
                         now.hide(False)
-                if left_panel_2.mode and not build and buttons[0] and len(version_update) and False not in enternet():
-                    down = max(version_update)
-                    SERVER.download('/app1/' + down, down)
-                    with open('deliteversion.txt', mode='a+', encoding=VERSION_DATA['enc']) as file:
-                        file.writelines(VERSION_DATA['version'] + '\n')
-                        file.writelines(__file__ + '\n')
-                    game_loop = False
                 if game and None not in pxy and my_step and my_step == my_step_b:
                     rez, cor = enemy.attack(pxy[0], pxy[1])
                     if rez >= 0:
@@ -722,7 +731,7 @@ if game_loop:
                     left_panel_1.obj[i].nc = COLORS['green']
                 else:
                     left_panel_1.obj[i].nc = COLORS['meddle']
-        if not win and not my_step and my_step == my_step_b:
+        if not win and not my_step and my_step == my_step_b and timer3.tk():
             if len(enemy_var):
                 varp = enemy_var.pop(randint(0, len(enemy_var) - 1))
                 rez2, cor2 = player.attack(enemy_po[0] + varp[0], enemy_po[1] + varp[1])
@@ -753,6 +762,7 @@ if game_loop:
             else:
                 if len(enemy_task):
                     enemy_po = enemy_task.pop(0)
+                    enemy_var = var[:]
                 else:
                     enemy_var = var[:]
                     enemy_po = [randint(1, 18), randint(1, 18)]
