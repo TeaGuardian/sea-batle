@@ -5,7 +5,7 @@ import os
 from random import randint, choice
 from datetime import datetime, timedelta
 pg.init()
-SERVER = yadisk.YaDisk(token='AQAAAABe4dAKAAfqWTsYeQYEpkBesP0JeSYLRTw')
+SERVER = yadisk.YaDisk(token='ВАШ_ТОКЕН')
 clock = pg.time.Clock()
 VERSION_DATA = {'version': '0.0.4',
                 'files': ['0F.png', '0T.png', '1F.png', '1T.png', '5T.png',
